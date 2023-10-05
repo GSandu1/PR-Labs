@@ -12,53 +12,11 @@ class Product:
         self.price = price
         self.description = description
 
-with open('products.json', 'r', encoding='utf-8') as file:
-    products_data = json.load(file)
-
-products = [Product(**data) for data in products_data]
-
-home_page_template = Template("""
-<h1>This is our home page</h1>
-<p>Check out our <a href='/about'>about page</a></p>
-<p>Check out your <a href='/cart'>cart</a></p>
-<h2>Products</h2>
-{% for product in products %}
-    <p><a href='/product/{{ loop.index }}'>{{ product.name }}</a> - Price: ${{ product.price }} <a href='/add_to_cart/{{ loop.index }}'>Add to Cart</a></p>
-{% endfor %}
-""")
-
-about_page_template = Template("""
-<h1>About our store:</h1>
-<a href="/">Go back</a>
-<p>Here are the best Romania hits</p>
-""")
-
-cart_page_template = Template("""
-<h1>Your Cart</h1>
-<a href="/">Go back</a>
-{% if cart.items %}
-    <ul>
-    {% for item in cart.items %}
-        <li>{{ item.product.name }} - Price: ${{ item.product.price }} <a href='/remove_from_cart/{{ loop.index }}'>Remove</a></li>
-    {% endfor %}
-    </ul>
-    <p>Total Cost: ${{ cart.get_total_cost() }}</p>
-{% else %}
-    <p>Your cart is empty</p>
-{% endif %}
-""")
-
-product_template = Template("""
-<h1>{{ product.name }}</h1>
-<a href="/">Go back</a>
-<p>Author: {{ product.author }}</p>
-<p>Price: ${{ product.price }}</p>
-<p>Description: {{ product.description }}</p>
-""")
 
 class CartItem:
     def __init__(self, product):
         self.product = product
+
 
 class Cart:
     def __init__(self):
@@ -72,61 +30,118 @@ class Cart:
             del self.items[index]
 
     def get_total_cost(self):
-        print(self.items)
         return sum(item.product.price for item in self.items)
 
-cart = Cart()
+
+class Templates:
+    def __init__(self, products):
+        self.products = products
+        self.home = self._get_home_template()
+        self.about = self._get_about_template()
+        self.cart = self._get_cart_template()
+        self.product = self._get_product_template()
+
+    def _get_home_template(self):
+        return Template("""
+        <h1> home page</h1>
+        <h2>Products</h2>
+        {% for product in products %}
+            <p><a href='/product/{{ loop.index }}'>{{ product.name }}</a> - Price: ${{ product.price }} <a href='/add_to_cart/{{ loop.index }}'>Add to Cart</a></p>
+        {% endfor %}
+        """)
+
+    def _get_about_template(self):
+        return Template("""
+        <h1>About our store:</h1>
+        <a href="/">Go back</a>
+        <p>Rap never die</p>
+        """)
+
+    def _get_cart_template(self):
+        return Template("""
+        <h1>Your Cart</h1>
+        <a href="/">Go back</a>
+        {% if cart.items %}
+            <ul>
+            {% for item in cart.items %}
+                <li>{{ item.product.name }} - Price: ${{ item.product.price }} <a href='/remove_from_cart/{{ loop.index }}'>Remove</a></li>
+            {% endfor %}
+            </ul>
+            <p>Total Cost: ${{ cart.get_total_cost() }}</p>
+        {% else %}
+            <p>Your cart is empty</p>
+        {% endif %}
+        """)
+
+    def _get_product_template(self):
+        return Template("""
+        <h1>{{ product.name }}</h1>
+        <a href="/">Go back</a>
+        <p>Author: {{ product.author }}</p>
+        <p>Price: ${{ product.price }}</p>
+        <p>Description: {{ product.description }}</p>
+        """)
 
 
-class MyHandler(http.server.SimpleHTTPRequestHandler):
+class RequestHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, templates, cart, **kwargs):
+        self.templates = templates
+        self.cart = cart
+        super().__init__(*args, **kwargs)
+
     def do_GET(self):
         if self.path == '/':
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(home_page_template.render(products=products).encode())
+            self._render(200, self.templates.home.render(products=self.templates.products))
         elif self.path == '/about':
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(about_page_template.render().encode())
+            self._render(200, self.templates.about.render())
         elif self.path == '/cart':
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(cart_page_template.render(cart=cart).encode())
+            self._render(200, self.templates.cart.render(cart=self.cart))
         elif re.match(r'/product/\d+', self.path):
-            product_id = int(self.path.split('/')[-1])
-            if 0 < product_id <= len(products):
-                product = products[product_id - 1]
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(product_template.render(product=product).encode())
+            product_id = int(self.path.split('/')[-1]) - 1
+            if 0 <= product_id < len(self.templates.products):
+                self._render(200, self.templates.product.render(product=self.templates.products[product_id]))
             else:
-                self.send_response(404)
-                self.end_headers()
-                self.wfile.write("Product not found".encode())
+                self._render(404, "Product not found")
         elif re.match(r'/add_to_cart/\d+', self.path):
-            product_id = int(self.path.split('/')[-1])
-            if 0 < product_id <= len(products):
-                product = products[product_id - 1]
-                cart.add_item(CartItem(product))
-                self.send_response(302)
-                self.send_header('Location', '/cart')
-                self.end_headers()
+            product_id = int(self.path.split('/')[-1]) - 1
+            if 0 <= product_id < len(self.templates.products):
+                self.cart.add_item(CartItem(self.templates.products[product_id]))
+                self._redirect('/cart')
             else:
-                self.send_response(404)
-                self.end_headers()
-                self.wfile.write("Product not found".encode())
+                self._render(404, "Product not found")
         elif re.match(r'/remove_from_cart/\d+', self.path):
-            item_index = int(self.path.split('/')[-1])
-            cart.remove_item(item_index - 1)
-            self.send_response(302)
-            self.send_header('Location', '/cart')
-            self.end_headers()
+            item_id = int(self.path.split('/')[-1]) - 1
+            self.cart.remove_item(item_id)
+            self._redirect('/cart')
         else:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write("404 Page not found".encode())
+            self._render(404, "Page not found")
+
+    def _render(self, status_code, content):
+        self.send_response(status_code)
+        self.end_headers()
+        self.wfile.write(content.encode())
+
+    def _redirect(self, location):
+        self.send_response(302)
+        self.send_header('Location', location)
+        self.end_headers()
 
 
-with socketserver.TCPServer(("", 8081), MyHandler) as httpd:
-    print("Port 8081 has started the server")
-    httpd.serve_forever()
+def load_products(filename):
+    with open(filename, 'r', encoding='utf-8') as file:
+        products_data = json.load(file)
+    return [Product(**data) for data in products_data]
+
+
+def run_server(port, handler):
+    with socketserver.TCPServer(("", port), handler) as httpd:
+        print(f"port {port}")
+        httpd.serve_forever()
+
+
+if __name__ == "__main__":
+    products = load_products('products.json')
+    cart = Cart()
+    templates = Templates(products)
+    handler = lambda *args, **kwargs: RequestHandler(*args, templates=templates, cart=cart, **kwargs)
+    run_server(8081, handler)
