@@ -1,0 +1,80 @@
+[
+    {
+        "name": "Cristal & МОЁТ",
+        "author": "Morgenstern",
+        "price": 5,
+        "description": "A blend of catchy rhythms and bold lyrics, another hit from the renowned artist Morgenstern."
+    },
+    {
+        "name": "El Problema",
+        "author": "Morgenstern",
+        "price": 4,
+        "description": "A popular track where Morgenstern delivers an energetic performance, showcasing his unique style."
+    },
+    {
+        "name": "Вот так",
+        "author": "Morgenstern",
+        "price": 4,
+        "description": "An expressive track that highlights Morgenstern's versatility and lyrical creativity."
+    },
+    {
+        "name": "Молодость",
+        "author": "Morgenstern",
+        "price": 3,
+        "description": "Morgenstern reflects on youth, with a melodic and nostalgic tone, resonating with many fans."
+    },
+    {
+        "name": "В Клубе",
+        "author": "Timati",
+        "price": 6,
+        "description": "A party anthem from Timati that has become a staple in clubs, featuring irresistible beats."
+    },
+    {
+        "name": "Не сходи с ума",
+        "author": "Timati",
+        "price": 5,
+        "description": "Timati delivers a powerful performance, blending his iconic rap style with catchy melodies."
+    },
+    {
+        "name": "Где ты, где я",
+        "author": "Timati",
+        "price": 3,
+        "description": "A hit single where Timati explores themes of love and relationships, backed by compelling beats."
+    },
+    {
+        "name": "No Diet",
+        "author": "Digga D",
+        "price": 8,
+        "description": "A popular UK drill track with catchy beats and impactful lyrics."
+    },
+    {
+        "name": "Air Force",
+        "author": "DigDat",
+        "price": 7,
+        "description": "A drill anthem that gained massive popularity, featuring hard-hitting lyrics."
+    },
+    {
+        "name": "Keisha & Becky - Remix",
+        "author": "Russ, Tion Wayne",
+        "price": 3,
+        "description": "A remix that became one of the most iconic UK drill songs, featuring multiple artists."
+    },
+    {
+        "name": "Day in the Life",
+        "author": "Central Cee",
+        "price": 6,
+        "description": "Central Cee delivers a narrative of his daily life, reflecting on his successes and challenges."
+    },
+    {
+        "name": "Loading",
+        "author": "Central Cee",
+        "price": 10,
+        "description": "A popular track that highlights Central Cee's distinct flow and lyrical prowess."
+    },
+    {
+        "name": "6 for 6",
+        "author": "Central Cee",
+        "price": 11,
+        "description": "Central Cee reflects on his achievements and his journey in the drill music scene."
+    }
+]
